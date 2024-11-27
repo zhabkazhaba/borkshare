@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bork Share</title>
+</head>
+<style>
+
+</style>
+<body>
+    <h1>File share server</h1>
+    <h2>Upload file:</h2>
+    <form id="upload_form">
+        <input type="file" name="file" />
+        <input type="submit" value="Upload" />
+    </form>
+    <h2>Download files:</h2>
+    <ul id="filelist"></ul>
+    <script>
+
+        document.getElementById("upload_form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const form_data = new FormData(this);
+
+            fetch("/upload", {
+                method: "POST",
+                body: form_data
+            })
+                .then(response => response.text())
+                .then(data => {
+                    alert("File uploaded...");
+                    refreshFileList();
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                });
+        });
+
+        function refreshFileList() {
+            fetch("/filelist")
+                .then(response => response.json())
+                .then(files => {
+                    const filelist = document.getElementById("filelist");
+                    filelist.innerHTML = '';
+                    files.forEach(file => {
+                        const li = document.createElement("li");
+                        const a = document.createElement("a");
+                        a.href = "/download?file=" + file;
+                        a.innerText = file;
+                        li.appendChild(a);
+                        filelist.appendChild(li);
+                    });
+                });
+        }
+
+        refreshFileList();
+    </script>
+</body>
+</html>
